@@ -1,0 +1,10 @@
+#localVideo {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 200px;
+}
+
+#videoBox {display: none;}
+
+#videoBox video {max-width: 100%; height: auto; z-index: -100;}

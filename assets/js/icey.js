@@ -5,13 +5,16 @@ comm.on('local', function(peer) {
 });
 
 var addUser = function(peer) {
-    document.body.appendChild(peer.getVideo());
+    $('#videoBox').html(peer.getVideo());
+    // document.body.appendChild(peer.getVideo());
     $('#waiting').hide();
+    $('#videoBox').show();
 }
 
 comm.on('connected', addUser);
 
 comm.on('disconnect', function(peer) {
+    $('#videoBox').hide();
     document.getElementById(peer.callerID).remove();
     $('#waiting').show();
 });
