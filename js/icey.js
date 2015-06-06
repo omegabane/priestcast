@@ -1,16 +1,19 @@
 var comm = new Icecomm('2iEvwDWztV1TVDx9MRO4NexZaD57FeDfWS4FRaRDjygBMfKFi2');
 
-comm.on('local', function(options) {
-  localVideo.src = options.stream;
+comm.on('local', function(peer) {
+  localVideo.src = peer.stream;
 });
 
-comm.on('connected', function(options) {
-    document.body.appendChild(options.getVideo());
-    document.getElementById('waiting').remove();
-});
+var addUser = function(peer) {
+    document.body.appendChild(peer.getVideo());
+    $('#waiting').hide();
+}
 
-comm.on('disconnect', function(options) {
-    document.getElementById(options.callerID).remove();
+comm.on('connected', addUser);
+
+comm.on('disconnect', function(peer) {
+    document.getElementById(peer.callerID).remove();
+    $('#waiting').show();
 });
 
 comm.connect('Catholic Hackathon');
