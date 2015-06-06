@@ -2,12 +2,14 @@ from flask import Flask, request
 from twilio import twiml
 from twilio.rest import TwilioRestClient, TwilioTaskRouterClient
 import os
+import config
 
 app = Flask(__name__)
 
 
 twilio_rest_client = TwilioRestClient(os.environ["CATHOLIC_HOTLINE_ACCOUNT_SID"], os.environ["CATHOLIC_HOTLINE_AUTH_TOKEN"])
 twilio_task_router_client = TwilioTaskRouterClient(os.environ["CATHOLIC_HOTLINE_ACCOUNT_SID"], os.environ["CATHOLIC_HOTLINE_AUTH_TOKEN"])
+priests = config.priests
 
 
 @app.route('/')
@@ -61,12 +63,13 @@ def contact_priests():
         phone_number=phone_numbers[0].phone_number,
         voice_url="http://dan.ngrok.io/handle_priest_call?requester_number=" + request.values.get('From'),
     )
-    twilio_rest_client.messages.create(
-        to="number",
-        from_=phone_number.phone_number,
-        body="Hi Fr. Joe, you have an incoming call from the Catholic Hot line. Please call " +
-             phone_number.phone_number + " to be connected."
-    )
+    for priest in priests:
+        twilio_rest_client.messages.create(
+            to=priest.get('number'),
+            from_=phone_number.phone_number,
+            body="Hi "+priest.get('name')+", you have an incoming call from the Catholic Hot line. Please call " +
+                 phone_number.phone_number + " to be connected."
+        )
 
 
 def send_message_to_caller_contacting_priests():
@@ -82,7 +85,8 @@ def send_message_to_caller_contacting_priests():
 def handle_priest_call():
     requester_number = request.args.get('requester_number')
     response = twiml.Response()
-    response.say("Hi Father Jeff, now connecting you with the Catholic Hotline requester.", voice="alice")
+    priest = next(temp_priest for temp_priest in priests if temp_priest.get("number")==request.values.get('From'))
+    response.say("Hi "+priest.get("voice_formatted_name")+", now connecting you with the Catholic Hotline requester.", voice="alice")
     response.dial(requester_number, callerId="+14154506600")
     return response.toxml()
 
